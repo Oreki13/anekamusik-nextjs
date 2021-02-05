@@ -1,65 +1,43 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import dynamic from "next/dynamic";
+import Head from "next/head";
+import React, { Fragment } from "react";
+import firebase from "../config/config";
+const Navbar = dynamic(() => import("../component/navbar/navbar"));
+const Search = dynamic(() => import("../component/search/search"));
+const Content = dynamic(() => import("../component/content/index"));
+const Footer = dynamic(() => import("../component/footer/footer"));
 
-export default function Home() {
+const Shop = ({ res }) => {
   return (
-    <div className={styles.container}>
+    <Fragment>
       <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
+        <title>Shop</title>
+        <link rel="icon" href="/myIcon.ico" />
       </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+      <div className="flex flex-col justify-between h-screen bg-gray-50">
+        <div>
+          <Navbar />
+          <div className=" container  mx-auto flex justify-center py-5">
+            <Search />
+          </div>
+          <div className="container mx-auto my-5">
+            <Content datas={res} />
+          </div>
         </div>
-      </main>
+        <Footer />
+      </div>
+    </Fragment>
+  );
+};
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+export async function getStaticProps() {
+  const db = firebase.firestore();
+  const getKategoris = await db.collection("kategoris").get();
+  const data = getKategoris.docs.map((doc) => ({ ...doc.data() }));
+  const res = !getKategoris.empty ? data : [];
+  return {
+    props: { res },
+  };
 }
+
+export default Shop;
